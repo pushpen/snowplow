@@ -16,9 +16,13 @@ import java.io.{PrintWriter, StringWriter}
 
 import scala.util.control.NonFatal
 
-import cats.data.{NonEmptyList, Validated, ValidatedNel}
-import cats.syntax.validated._
-import com.snowplowanalytics.iglu.client.Resolver
+import cats.Monad
+import cats.data.{EitherT, NonEmptyList, Validated, ValidatedNel}
+import cats.effect.Clock
+import cats.implicits._
+import com.snowplowanalytics.iglu.client.Client
+import com.snowplowanalytics.iglu.client.resolver.registries.RegistryLookup
+import io.circe.Json
 import org.joda.time.DateTime
 
 import adapters.AdapterRegistry
@@ -35,53 +39,52 @@ object EtlPipeline {
    * We have to do some unboxing because enrichEvent expects a raw CanonicalInput as its argument,
    * not a MaybeCanonicalInput.
    * @param registry Contains configuration for all enrichments to apply
+   * @param client Our Iglu client, for schema lookups and validation
    * @param etlVersion The ETL version
    * @param etlTstamp The ETL timestamp
    * @param input The ValidatedMaybeCanonicalInput
-   * @param resolver (implicit) The Iglu resolver used for schema lookup and validation
    * @return the ValidatedMaybeCanonicalOutput. Thanks to flatMap, will include any validation
    * errors contained within the ValidatedMaybeCanonicalInput
    */
-  def processEvents(
+  def processEvents[F[_]: Monad: RegistryLookup: Clock](
     registry: EnrichmentRegistry,
+    client: Client[F, Json],
     etlVersion: String,
     etlTstamp: DateTime,
-    input: ValidatedNel[String, Option[CollectorPayload]])(
-    implicit resolver: Resolver
-  ): List[ValidatedNel[String, EnrichedEvent]] = {
-    def flattenToList[A](
-      v: ValidatedNel[String, Option[ValidatedNel[String, NonEmptyList[ValidatedNel[String, A]]]]]
-    ): List[ValidatedNel[String, A]] = v match {
-      case Validated.Valid(Some(Validated.Valid(nel))) => nel.toList
+    input: ValidatedNel[String, Option[CollectorPayload]]
+  ): F[List[ValidatedNel[String, EnrichedEvent]]] = {
+    def flattenToList(
+      v: ValidatedNel[String, Option[ValidatedNel[String, NonEmptyList[EnrichedEvent]]]]
+    ): List[ValidatedNel[String, EnrichedEvent]] = v match {
+      case Validated.Valid(Some(Validated.Valid(nel))) => nel.toList.map(_.valid)
       case Validated.Valid(Some(Validated.Invalid(f))) => List(f.invalid)
       case Validated.Invalid(f) => List(f.invalid)
       case Validated.Valid(None) => Nil
     }
 
     try {
-      val e: ValidatedNel[
-        String,
-        Option[ValidatedNel[String, NonEmptyList[ValidatedNel[String, EnrichedEvent]]]]] =
-        for {
+      val e = for {
           maybePayload <- input
         } yield
           for {
             payload <- maybePayload
           } yield
-            for {
-              events <- AdapterRegistry.toRawEvents(payload)
-            } yield
-              for {
-                event <- events
-                enriched = EnrichmentManager.enrichEvent(registry, etlVersion, etlTstamp, event)
-              } yield enriched
+            (for {
+              events <- EitherT(AdapterRegistry.toRawEvents(payload, client).map(_.toEither))
+              enrichedEvents <-
+                events.map { e =>
+                  val r = EnrichmentManager
+                    .enrichEvent(registry, client, etlVersion, etlTstamp, e).map(_.toEither)
+                  EitherT(r)
+                }.sequence
+            } yield enrichedEvents).value.map(_.toValidated)
 
-      flattenToList[EnrichedEvent](e)
+      e.map(_.sequence).sequence.map(flattenToList)
     } catch {
       case NonFatal(nf) => {
         val errorWriter = new StringWriter
         nf.printStackTrace(new PrintWriter(errorWriter))
-        List(s"Unexpected error processing events: $errorWriter".invalidNel)
+        Monad[F].pure(List(s"Unexpected error processing events: $errorWriter".invalidNel))
       }
     }
   }

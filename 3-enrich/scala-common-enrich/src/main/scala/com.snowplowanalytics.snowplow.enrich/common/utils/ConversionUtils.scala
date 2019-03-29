@@ -250,7 +250,7 @@ object ConversionUtils {
       val r = uri.replaceAll(" ", "%20") // Because so many raw URIs are bad, #346
       Some(URI.create(r)).asRight
     } catch {
-      case npe: NullPointerException => None.asRight
+      case _: NullPointerException => None.asRight
       case iae: IllegalArgumentException =>
         useNetaporter match {
           case false =>
@@ -302,7 +302,7 @@ object ConversionUtils {
         val jint: JInteger = str.toInt
         jint.asRight
       } catch {
-        case nfe: NumberFormatException =>
+        case _: NumberFormatException =>
           "Field [%s]: cannot convert [%s] to Int".format(field, str).asLeft
       }
   }
@@ -357,7 +357,7 @@ object ConversionUtils {
     try {
       BigDecimal(str).setScale(2, BigDecimal.RoundingMode.HALF_EVEN).toDouble.asRight
     } catch {
-      case nfe: NumberFormatException =>
+      case _: NumberFormatException =>
         "Field [%s]: cannot convert [%s] to Double".format(field, str).asLeft
   }
 
