@@ -44,7 +44,8 @@ object ConversionUtils {
     // Optional
     path: Option[String],
     query: Option[String],
-    fragment: Option[String])
+    fragment: Option[String]
+  )
 
   /**
    * Explodes a URI into its 6 components pieces. Simple code but we use it in multiple places
@@ -192,7 +193,7 @@ object ConversionUtils {
         "Field [%s]: Exception URL-decoding [%s] (encoding [%s]): [%s]"
           .format(field, str, enc, e.getMessage)
           .asLeft
-  }
+    }
 
   /**
    * On 17th August 2013, Amazon made an unannounced change to their CloudFront
@@ -279,10 +280,11 @@ object ConversionUtils {
    * @param encoding Encoding of the URI
    */
   def extractQuerystring(uri: URI, encoding: Charset): Either[String, Map[String, String]] =
-    Try(URLEncodedUtils.parse(uri, encoding).asScala.map(p => (p.getName -> p.getValue))).recoverWith {
-      case NonFatal(_) =>
-        Try(Uri.parse(uri.toString).query.params).map(l => l.map(t => (t._1, t._2.getOrElse(""))))
-    } match {
+    Try(URLEncodedUtils.parse(uri, encoding).asScala.map(p => (p.getName -> p.getValue)))
+      .recoverWith {
+        case NonFatal(_) =>
+          Try(Uri.parse(uri.toString).query.params).map(l => l.map(t => (t._1, t._2.getOrElse(""))))
+      } match {
       case util.Success(s) => s.toMap.asRight
       case util.Failure(e) =>
         s"Could not parse uri [$uri]. Uri parsing threw exception: [$e].".asLeft
@@ -305,7 +307,7 @@ object ConversionUtils {
         case _: NumberFormatException =>
           "Field [%s]: cannot convert [%s] to Int".format(field, str).asLeft
       }
-  }
+    }
 
   /**
    * Convert a String to a String containing a Redshift-compatible Double.
@@ -359,7 +361,7 @@ object ConversionUtils {
     } catch {
       case _: NumberFormatException =>
         "Field [%s]: cannot convert [%s] to Double".format(field, str).asLeft
-  }
+    }
 
   /**
    * Converts a String to a Double.
@@ -381,7 +383,7 @@ object ConversionUtils {
       case "1" => (1.toByte: JByte).asRight
       case "0" => (0.toByte: JByte).asRight
       case _ => s"Field [$field]: cannot convert [$str] to Boolean-like JByte".asLeft
-  }
+    }
 
   /**
    * Converts a String of value "1" or "0" to true or false respectively.
@@ -396,7 +398,7 @@ object ConversionUtils {
       false.asRight
     } else {
       s"Field [$field]: Cannot convert [$str] to boolean, only 1 or 0.".asLeft
-  }
+    }
 
   /**
    * Truncates a String - useful for making sure Strings can't overflow a database field.

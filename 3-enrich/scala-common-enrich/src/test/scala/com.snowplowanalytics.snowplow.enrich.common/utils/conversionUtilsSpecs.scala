@@ -30,26 +30,38 @@ class StringToUriSpec extends Specification with DataTables {
       "Simple URI" !! "https://google.com" ! Some(URI.create("https://google.com")).asRight |
       "Complex URI" !! "http://www.google.com/search?q=gateway+oracle+cards+denise+linn&hl=en&client=safari" ! Some(
         URI.create(
-          "http://www.google.com/search?q=gateway+oracle+cards+denise+linn&hl=en&client=safari")).asRight |
+          "http://www.google.com/search?q=gateway+oracle+cards+denise+linn&hl=en&client=safari"
+        )
+      ).asRight |
       "Salvageable bad URI with raw spaces" !! "http://www.psychicbazaar.com/2-tarot-cards/genre/gothic/type/all/view/grid?n=24&utm_source=GoogleSearch&utm_medium=cpc&utm_campaign=uk-tarot--gothic-tarot&utm_term=bohemian gothic tarot&utm_content=33088202008&gclid=CN2LmteX2LkCFQKWtAodrSMASw" ! Some(
         URI.create(
-          "http://www.psychicbazaar.com/2-tarot-cards/genre/gothic/type/all/view/grid?n=24&utm_source=GoogleSearch&utm_medium=cpc&utm_campaign=uk-tarot--gothic-tarot&utm_term=bohemian%20gothic%20tarot&utm_content=33088202008&gclid=CN2LmteX2LkCFQKWtAodrSMASw")).asRight |
+          "http://www.psychicbazaar.com/2-tarot-cards/genre/gothic/type/all/view/grid?n=24&utm_source=GoogleSearch&utm_medium=cpc&utm_campaign=uk-tarot--gothic-tarot&utm_term=bohemian%20gothic%20tarot&utm_content=33088202008&gclid=CN2LmteX2LkCFQKWtAodrSMASw"
+        )
+      ).asRight |
       "New salvageable bad URI" !! "http://adserver.adtech.de/adlink|3.0" ! Some(
-        URI.create("http://adserver.adtech.de/adlink%7C3.0")).asRight |
+        URI.create("http://adserver.adtech.de/adlink%7C3.0")
+      ).asRight |
       "Pipe in path" !! "http://www.example.com/a|b" ! Some(
-        URI.create("http://www.example.com/a%7Cb")).asRight |
+        URI.create("http://www.example.com/a%7Cb")
+      ).asRight |
       "Space in path" !! "http://www.example.com/a b" ! Some(
-        URI.create("http://www.example.com/a%20b")).asRight |
+        URI.create("http://www.example.com/a%20b")
+      ).asRight |
       "Pipe in qs" !! "http://www.example.com/?a=b|c" ! Some(
-        URI.create("http://www.example.com/?a=b%7Cc")).asRight |
+        URI.create("http://www.example.com/?a=b%7Cc")
+      ).asRight |
       "Space in qs" !! "http://www.example.com/?a=b c" ! Some(
-        URI.create("http://www.example.com/?a=b%20c")).asRight |
+        URI.create("http://www.example.com/?a=b%20c")
+      ).asRight |
       "Forward slash in qs" !! "http://www.example.com/?a=b/c" ! Some(
-        URI.create("http://www.example.com/?a=b/c")).asRight |
+        URI.create("http://www.example.com/?a=b/c")
+      ).asRight |
       "Plus in qs" !! "http://www.example.com/?a=b+c" ! Some(
-        URI.create("http://www.example.com/?a=b+c")).asRight |
+        URI.create("http://www.example.com/?a=b+c")
+      ).asRight |
       "Salvageable URI with plus in qs" !! "http://www.example.com/|/?a=b+c" ! Some(
-        URI.create("http://www.example.com/%7C/?a=b%2Bc")).asRight |> { (_, uri, expected) =>
+        URI.create("http://www.example.com/%7C/?a=b%2Bc")
+      ).asRight |> { (_, uri, expected) =>
       {
         ConversionUtils.stringToUri(uri) must_== expected
       }
@@ -63,25 +75,34 @@ class ExplodeUriSpec extends Specification with DataTables {
   def e1 =
     "SPEC NAME" || "URI" | "EXP. SCHEME" | "EXP. HOST" | "EXP. PORT" | "EXP. PATH" | "EXP. QUERY" | "EXP. FRAGMENT" |
       "With path, qs & #" !! "http://www.psychicbazaar.com/oracles/119-psycards-deck.html?view=print#detail" ! "http" ! "www.psychicbazaar.com" ! 80 ! Some(
-        "/oracles/119-psycards-deck.html") ! Some("view=print") ! Some("detail") |
+        "/oracles/119-psycards-deck.html"
+      ) ! Some("view=print") ! Some("detail") |
       "With path & space in qs" !! "http://psy.bz/genre/all/type/all?utm_source=google&utm_medium=cpc&utm_term=buy%2Btarot&utm_campaign=spring_sale" ! "http" ! "psy.bz" ! 80 ! Some(
-        "/genre/all/type/all") ! Some(
-        "utm_source=google&utm_medium=cpc&utm_term=buy%2Btarot&utm_campaign=spring_sale") ! None |
+        "/genre/all/type/all"
+      ) ! Some("utm_source=google&utm_medium=cpc&utm_term=buy%2Btarot&utm_campaign=spring_sale") ! None |
       "With path & no www" !! "http://snowplowanalytics.com/analytics/index.html" ! "http" ! "snowplowanalytics.com" ! 80 ! Some(
-        "/analytics/index.html") ! None ! None |
+        "/analytics/index.html"
+      ) ! None ! None |
       "Port specified" !! "http://www.nbnz.co.nz:440/login.asp" ! "http" ! "www.nbnz.co.nz" ! 440 ! Some(
-        "/login.asp") ! None ! None |
+        "/login.asp"
+      ) ! None ! None |
       "HTTPS & #" !! "https://www.lancs.ac.uk#footer" ! "https" ! "www.lancs.ac.uk" ! 443 ! None ! None ! Some(
-        "footer") |
+        "footer"
+      ) |
       "www2 & trailing /" !! "https://www2.williamhill.com/" ! "https" ! "www2.williamhill.com" ! 443 ! Some(
-        "/") ! None ! None |
+        "/"
+      ) ! None ! None |
       "Tab & newline in qs" !! "http://www.ebay.co.uk/sch/i.html?_from=R40&_trksid=m570.l2736&_nkw=%09+Clear+Quartz+Point+Rock+Crystal%0ADowsing+Pendulum" ! "http" ! "www.ebay.co.uk" ! 80 ! Some(
-        "/sch/i.html") ! Some(
-        "_from=R40&_trksid=m570.l2736&_nkw=%09+Clear+Quartz+Point+Rock+Crystal%0ADowsing+Pendulum") ! None |
+        "/sch/i.html"
+      ) ! Some(
+        "_from=R40&_trksid=m570.l2736&_nkw=%09+Clear+Quartz+Point+Rock+Crystal%0ADowsing+Pendulum"
+      ) ! None |
       "Tab & newline in path" !! "https://snowplowanalytics.com/analytic%0As/index%09nasty.html" ! "https" ! "snowplowanalytics.com" ! 443 ! Some(
-        "/analytic%0As/index%09nasty.html") ! None ! None |
+        "/analytic%0As/index%09nasty.html"
+      ) ! None ! None |
       "Tab & newline in #" !! "http://psy.bz/oracles/psycards.html?view=print#detail%09is%0Acorrupted" ! "http" ! "psy.bz" ! 80 ! Some(
-        "/oracles/psycards.html") ! Some("view=print") ! Some("detail%09is%0Acorrupted") |> {
+        "/oracles/psycards.html"
+      ) ! Some("view=print") ! Some("detail%09is%0Acorrupted") |> {
 
       (_, uri, scheme, host, port, path, query, fragment) =>
         {
@@ -132,7 +153,8 @@ class DecodeBase64UrlSpec extends Specification with DataTables with ScalaCheck 
   // Only way of getting a failure currently
   def e1 =
     ConversionUtils.decodeBase64Url(FieldName, null) must beLeft(
-      "Field [%s]: exception Base64-decoding [null] (URL-safe encoding): [null]".format(FieldName))
+      "Field [%s]: exception Base64-decoding [null] (URL-safe encoding): [null]".format(FieldName)
+    )
 
   // No string creates a failure
   def e2 =
@@ -190,7 +212,8 @@ class ValidateUuidSpec extends Specification with DataTables with ScalaCheck {
   def e2 =
     prop { (str: String) =>
       ConversionUtils.validateUuid(FieldName, str) must beLeft(
-        s"Field [$FieldName]: [$str] is not a valid UUID")
+        s"Field [$FieldName]: [$str] is not a valid UUID"
+      )
     }
 }
 
