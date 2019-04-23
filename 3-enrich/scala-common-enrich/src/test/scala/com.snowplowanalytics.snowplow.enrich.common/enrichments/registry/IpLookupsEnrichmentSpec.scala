@@ -12,6 +12,7 @@
  */
 package com.snowplowanalytics.snowplow.enrich.common.enrichments.registry
 
+import cats.Eval
 import cats.syntax.option._
 import cats.syntax.either._
 import com.snowplowanalytics.iglu.core.{SchemaKey, SchemaVer}
@@ -73,12 +74,15 @@ class IpLookupsEnrichmentSpec extends Specification with DataTables {
           timezone = Some("Asia/Harbin"),
           postalCode = None,
           metroCode = None,
-          regionName = Some("Jilin Sheng")
+          regionName = Some("Jilin Sheng"),
+          isInEuropeanUnion = false,
+          continent = "Asia",
+          accuracyRadius = 100
         ).asRight.some |> { (_, ipAddress, expected) =>
-      config.enrichment
-        .extractIpInformation(ipAddress)
-        .ipLocation
-        .map(_.leftMap(_.getClass.getSimpleName)) must_== expected
+      (for {
+        e <- config.enrichment[Eval]
+        res <- e.extractIpInformation(ipAddress)
+      } yield res.ipLocation).value.map(_.leftMap(_.getClass.getSimpleName)) must_== expected
     }
 
   def e2 =
