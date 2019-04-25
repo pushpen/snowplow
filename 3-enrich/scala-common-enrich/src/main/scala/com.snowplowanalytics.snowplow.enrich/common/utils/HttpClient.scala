@@ -14,17 +14,38 @@ package com.snowplowanalytics.snowplow.enrich.common.utils
 
 import scala.util.control.NonFatal
 
+import cats.{Eval, Id}
+import cats.effect.Sync
 import cats.syntax.either._
 import scalaj.http._
 
+trait HttpClient[F[_]] {
+  def getResponse(request: HttpRequest): F[Either[Throwable, String]]
+}
+
 object HttpClient {
+  def apply[F[_]](implicit ev: HttpClient[F]): HttpClient[F] = ev
+
+  implicit def syncHttpClient[F[_]: Sync]: HttpClient[F] = new HttpClient[F] {
+    override def getResponse(request: HttpRequest): F[Either[Throwable, String]] =
+      Sync[F].delay(getBody(request))
+  }
+
+  implicit def evalHttpClient: HttpClient[Eval] = new HttpClient[Eval] {
+    override def getResponse(request: HttpRequest): Eval[Either[Throwable, String]] =
+      Eval.later(getBody(request))
+  }
+
+  implicit def idHttpClient: HttpClient[Id] = new HttpClient[Id] {
+    override def getResponse(request: HttpRequest): Id[Either[Throwable, String]] = getBody(request)
+  }
 
   /**
    * Blocking method to get body of HTTP response
    * @param request assembled request object
    * @return validated body of HTTP request
    */
-  def getBody(request: HttpRequest): Either[Throwable, String] =
+  private def getBody(request: HttpRequest): Either[Throwable, String] =
     try {
       val res = request.asString
       if (res.isSuccess) res.body.asRight
