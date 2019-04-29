@@ -28,7 +28,6 @@ import cats.syntax.either._
 import cats.syntax.option._
 import com.netaporter.uri.Uri
 import org.apache.commons.codec.binary.Base64
-import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.http.client.utils.URLEncodedUtils
 
 /** General-purpose utils to help the ETL process along. */
@@ -267,7 +266,7 @@ object ConversionUtils {
             } yield finalUri
           case true =>
             "Provided URI string [%s] violates RFC 2396: [%s]"
-              .format(uri, ExceptionUtils.getRootCause(iae).getMessage)
+              .format(uri, iae.getMessage)
               .asLeft
         }
       case NonFatal(e) =>

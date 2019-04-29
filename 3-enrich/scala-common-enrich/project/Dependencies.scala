@@ -32,26 +32,18 @@ object Dependencies {
 
   object V {
     // Java
-    val http             = "4.3.3"
-    val commonsLang      = "3.4"
-    val commonsIo        = "2.4"
     val commonsCodec     = "1.11"
-    val yodaTime         = "2.2"
-    val yodaConvert      = "1.2"
+    val jodaTime         = "2.2"
     val useragent        = "1.21"
     val jacksonDatabind  = "2.2.3"
-    val jsonValidator    = "2.2.3"
-    val mavenArtifact    = "3.2.2"
     val uaParser         = "1.4.0"
     val postgresDriver   = "9.4.1208.jre7"
     val mysqlConnector   = "5.1.39"
     val jaywayJsonpath   = "2.4.0"
     val iabClient        = "0.1.0"
+    val rhino            = "1.7.10"
     // Scala
     val cats             = "1.6.0"
-    val snowplowRawEvent = "0.1.0"
-    val collectorPayload = "0.0.0"
-    val schemaSniffer    = "0.0.0"
     val refererParser    = "0.6.0-M2"
     val maxmindIplookups = "0.6.0-M1"
     val circe            = "0.11.1"
@@ -64,6 +56,10 @@ object Dependencies {
     val gatlingJsonpath  = "0.6.14"
     val scalaUri         = "0.5.0"
     val scalaLruMap      = "0.3.0-M3"
+    // Thrift schemas
+    val snowplowRawEvent = "0.1.0"
+    val collectorPayload = "0.0.0"
+    val schemaSniffer    = "0.0.0"
     // Scala (test only)
     val specs2           = "4.5.1"
     val scalaCheck       = "1.10.0"
@@ -73,21 +69,16 @@ object Dependencies {
 
   object Libraries {
     // Java
-    val httpClient       = "org.apache.httpcomponents"  %  "httpclient"                    % V.http
-    val commonsLang      = "org.apache.commons"         %  "commons-lang3"                 % V.commonsLang
-    val commonsIo        = "commons-io"                 %  "commons-io"                    % V.commonsIo
     val commonsCodec     = "commons-codec"              %  "commons-codec"                 % V.commonsCodec
-    val yodaTime         = "joda-time"                  %  "joda-time"                     % V.yodaTime
-    val yodaConvert      = "org.joda"                   %  "joda-convert"                  % V.yodaConvert
+    val jodaTime         = "joda-time"                  %  "joda-time"                     % V.jodaTime
     val useragent        = "eu.bitwalker"               %  "UserAgentUtils"                % V.useragent
     val jacksonDatabind  = "com.fasterxml.jackson.core" %  "jackson-databind"              % V.jacksonDatabind
-    val jsonValidator    = "com.github.fge"             %  "json-schema-validator"         % V.jsonValidator
-    val mavenArtifact    = "org.apache.maven"           %  "maven-artifact"                % V.mavenArtifact
     val uaParser         = "com.github.ua-parser"       %  "uap-java"                      % V.uaParser
     val postgresDriver   = "org.postgresql"             %  "postgresql"                    % V.postgresDriver
     val mysqlConnector   = "mysql"                      %  "mysql-connector-java"          % V.mysqlConnector
     val jaywayJsonpath   = "com.jayway.jsonpath"        %  "json-path"                     % V.jaywayJsonpath
     val iabClient        = "com.snowplowanalytics"      %  "iab-spiders-and-robots-client" % V.iabClient
+    val rhino            = "org.mozilla"                %  "rhino"                         % V.rhino
 
     // Scala
     val circeDeps        = List(
@@ -100,9 +91,6 @@ object Dependencies {
     val circeOptics      = "io.circe"                   %% "circe-optics"                  % V.circeOptics
     val circeJackson     = "io.circe"                   %% "circe-jackson28"               % V.circeJackson
     val scalaForex       = "com.snowplowanalytics"      %% "scala-forex"                   % V.scalaForex
-    val snowplowRawEvent = "com.snowplowanalytics"      %  "snowplow-thrift-raw-event"     % V.snowplowRawEvent
-    val collectorPayload = "com.snowplowanalytics"      %  "collector-payload-1"           % V.collectorPayload
-    val schemaSniffer    = "com.snowplowanalytics"      %  "schema-sniffer-1"              % V.schemaSniffer
     val refererParser    = "com.snowplowanalytics"      %% "scala-referer-parser"          % V.refererParser
     val maxmindIplookups = "com.snowplowanalytics"      %% "scala-maxmind-iplookups"       % V.maxmindIplookups
     val igluClient       = "com.snowplowanalytics"      %% "iglu-scala-client"             % V.igluClient
@@ -111,6 +99,10 @@ object Dependencies {
     val scalaj           = "org.scalaj"                 %% "scalaj-http"                   % V.scalaj
     val gatlingJsonpath  = "io.gatling"                 %% "jsonpath"                      % V.gatlingJsonpath
     val scalaLruMap      = "com.snowplowanalytics"      %% "scala-lru-map"                 % V.scalaLruMap
+    // Thrift schemas
+    val snowplowRawEvent = "com.snowplowanalytics"      %  "snowplow-thrift-raw-event"     % V.snowplowRawEvent
+    val collectorPayload = "com.snowplowanalytics"      %  "collector-payload-1"           % V.collectorPayload
+    val schemaSniffer    = "com.snowplowanalytics"      %  "schema-sniffer-1"              % V.schemaSniffer
     // Scala (test only)
     val specs2           = "org.specs2"                 %% "specs2-core"                   % V.specs2         % "test"
     val specs2Cats       = "org.specs2"                 %% "specs2-cats"                   % V.specs2         % "test"

@@ -29,28 +29,20 @@ lazy val root = project
   .settings(
     libraryDependencies ++= Seq(
       // Java
-      Dependencies.Libraries.httpClient,
-      Dependencies.Libraries.yodaTime,
-      Dependencies.Libraries.yodaConvert,
-      Dependencies.Libraries.commonsLang,
-      Dependencies.Libraries.commonsIo,
+      Dependencies.Libraries.jodaTime,
       Dependencies.Libraries.commonsCodec,
       Dependencies.Libraries.useragent,
       Dependencies.Libraries.jacksonDatabind,
-      Dependencies.Libraries.jsonValidator,
-      Dependencies.Libraries.mavenArtifact,
       Dependencies.Libraries.uaParser,
       Dependencies.Libraries.postgresDriver,
       Dependencies.Libraries.mysqlConnector,
       Dependencies.Libraries.jaywayJsonpath,
       Dependencies.Libraries.iabClient,
+      Dependencies.Libraries.rhino,
       // Scala
       Dependencies.Libraries.cats,
       Dependencies.Libraries.circeOptics,
       Dependencies.Libraries.circeJackson,
-      Dependencies.Libraries.snowplowRawEvent,
-      Dependencies.Libraries.collectorPayload,
-      Dependencies.Libraries.schemaSniffer,
       Dependencies.Libraries.refererParser,
       Dependencies.Libraries.maxmindIplookups,
       Dependencies.Libraries.igluClient,
@@ -60,6 +52,10 @@ lazy val root = project
       Dependencies.Libraries.scalaj,
       Dependencies.Libraries.gatlingJsonpath,
       Dependencies.Libraries.scalaLruMap,
+      // Thrift schemas
+      Dependencies.Libraries.snowplowRawEvent,
+      Dependencies.Libraries.collectorPayload,
+      Dependencies.Libraries.schemaSniffer,
       // Scala (test only)
       Dependencies.Libraries.specs2,
       Dependencies.Libraries.specs2Cats,
