@@ -26,7 +26,7 @@ import scala.util.control.NonFatal
 
 import cats.syntax.either._
 import cats.syntax.option._
-import com.netaporter.uri.Uri
+import io.lemonlabs.uri.{Uri, Url}
 import org.apache.commons.codec.binary.Base64
 import org.apache.http.client.utils.URLEncodedUtils
 
@@ -282,7 +282,7 @@ object ConversionUtils {
     Try(URLEncodedUtils.parse(uri, encoding).asScala.map(p => (p.getName -> p.getValue)))
       .recoverWith {
         case NonFatal(_) =>
-          Try(Uri.parse(uri.toString).query.params).map(l => l.map(t => (t._1, t._2.getOrElse(""))))
+          Try(Url.parse(uri.toString).query.params).map(l => l.map(t => (t._1, t._2.getOrElse(""))))
       } match {
       case util.Success(s) => s.toMap.asRight
       case util.Failure(e) =>
