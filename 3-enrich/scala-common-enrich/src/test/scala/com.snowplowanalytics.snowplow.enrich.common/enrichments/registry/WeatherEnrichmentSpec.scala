@@ -56,7 +56,7 @@ class WeatherEnrichmentSpec extends Specification {
   object validEvent {
     var lat: JFloat = 20.713052f
     var lon: JFloat = 70.98224f
-    var time: DateTime = new DateTime("2018-04-30T23:56:01.003+00:00")
+    var time: DateTime = new DateTime("2019-04-30T23:56:01.003+00:00")
   }
 
   def e1 = {
@@ -115,7 +115,7 @@ class WeatherEnrichmentSpec extends Specification {
     res.value.value must beRight.like {
       case weather =>
         val temp = weather.hcursor.downField("data").downField("main").get[Double]("humidity")
-        temp must beRight(92.0d)
+        temp must beRight(87.0d)
     }
   }
 
@@ -166,7 +166,7 @@ class WeatherEnrichmentSpec extends Specification {
     res.value.value must beRight.like { // successful request
       case weather =>
         weather.hcursor.get[TransformedWeather]("data") must beRight.like {
-          case w => w.dt must equalTo("2018-05-01T00:00:00.000Z")
+          case w => w.dt must equalTo("2019-05-01T00:00:00.000Z")
         }
     }
   }
