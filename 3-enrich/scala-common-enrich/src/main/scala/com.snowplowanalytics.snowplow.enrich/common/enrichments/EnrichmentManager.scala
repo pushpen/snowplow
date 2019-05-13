@@ -274,7 +274,7 @@ object EnrichmentManager {
       }
 
     // Fetch IAB enrichment context (before anonymizing the IP address)
-    val iabContext: Either[String, Option[Json]] = registry.iab match {
+    val iabContext: Either[NonEmptyList[String], Option[Json]] = registry.iab match {
       case Some(iab) =>
         iab
           .getIabContext(
@@ -282,6 +282,7 @@ object EnrichmentManager {
             Option(event.user_ipaddress),
             Option(event.derived_tstamp).map(EventEnrichments.fromTimestamp)
           )
+          .leftMap(_.map(_.toString))
           .map(_.some)
       case None => None.asRight
     }
@@ -328,7 +329,7 @@ object EnrichmentManager {
       registry.uaParser match {
         case Some(uap) =>
           Option(event.useragent) match {
-            case Some(ua) => uap.extractUserAgent(ua).map(_.some)
+            case Some(ua) => uap.extractUserAgent(ua).map(_.some).leftMap(_.toString)
             case None => None.asRight // No fields updated
           }
         case None => None.asRight
@@ -371,7 +372,7 @@ object EnrichmentManager {
               event.tr_shipping_base = convertedCu._3.orNull
               event.ti_price_base = convertedCu._4.orNull
             }
-          } yield ()).value
+          } yield ()).value.map(_.leftMap(_.map(_.toString)))
         case None => Monad[F].pure(().asRight)
       }
     }
@@ -486,7 +487,7 @@ object EnrichmentManager {
 
     // Execute the JavaScript scripting enrichment
     val jsScript: Either[String, List[Json]] = registry.javascriptScript match {
-      case Some(jse) => jse.process(event)
+      case Some(jse) => jse.process(event).leftMap(_.toString)
       case None => Nil.asRight
     }
 
@@ -503,14 +504,14 @@ object EnrichmentManager {
     }
 
     // Fetch weather context
-    val weatherContext: F[Either[String, Option[Json]]] = registry.weather match {
+    val weatherContext: F[Either[NonEmptyList[String], Option[Json]]] = registry.weather match {
       case Some(we) =>
         we.getWeatherContext(
             Option(event.geo_latitude),
             Option(event.geo_longitude),
             Option(event.derived_tstamp).map(EventEnrichments.fromTimestamp)
           )
-          .map(_.map(_.some))
+          .map(_.map(_.some).leftMap(_.map(_.toString)))
       case None => Monad[F].pure(None.asRight)
     }
 
@@ -535,7 +536,9 @@ object EnrichmentManager {
             otherContexts <- customContexts.product(unstructEvent)
             lookupResult <- otherContexts match {
               case (Validated.Valid(cctx), Validated.Valid(ue)) =>
-                enrichment.lookup(event, derivedContexts, cctx, ue)
+                enrichment
+                  .lookup(event, derivedContexts, cctx, ue)
+                  .map(_.leftMap(_.map(_.toString)))
               case _ =>
                 // Skip. Unstruct event or custom context corrupted (event enrichment will fail)
                 Monad[F].pure(Nil.validNel)
@@ -553,7 +556,9 @@ object EnrichmentManager {
             otherContexts <- customContexts.product(unstructEvent).product(sqlQueryContexts)
             lookupResult <- otherContexts match {
               case ((Validated.Valid(cctx), Validated.Valid(ue)), Validated.Valid(sctx)) =>
-                enrichment.lookup(event, derivedContexts ++ sctx, cctx, ue)
+                enrichment
+                  .lookup(event, derivedContexts ++ sctx, cctx, ue)
+                  .map(_.leftMap(_.map(_.toString)))
               case _ =>
                 // Skip. Unstruct event or custom context corrupted, event enrichment will fail anyway
                 Monad[F].pure(Nil.validNel)
@@ -616,11 +621,11 @@ object EnrichmentManager {
         api,
         sql,
         es.toValidatedNel,
-        w.toValidatedNel
+        w.toValidated
       ).mapN((_, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _) => ())
 
       val second =
-        (iabContext.toValidatedNel, piiTransform.valid).mapN((_, _) => ())
+        (iabContext.toValidated, piiTransform.valid).mapN((_, _) => ())
 
       (first, second).mapN((_, _) => event)
     }
