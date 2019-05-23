@@ -1109,7 +1109,7 @@ module Snowplow
 
       # Prettified string containing failure details
       # for this job flow.
-      Contract String => String
+      Contract String, Elasticity::ClusterStatus, Elasticity::ClusterStepStatus => String
       def get_failure_details(jobflow_id, cluster_status, cluster_step_status_for_run)
         [
           "EMR jobflow #{jobflow_id} failed, check Amazon EMR console and Hadoop logs for details (help: https://github.com/snowplow/snowplow/wiki/Troubleshooting-jobs-on-Elastic-MapReduce). Data files not archived.",
@@ -1200,6 +1200,7 @@ module Snowplow
       #
       # Parameters:
       # +jobflow+:: The jobflow to extract steps from
+      Contract String => Elasticity::ClusterStepStatus
       def cluster_step_status_for_run(jobflow)
         begin
           retries ||= 0
@@ -1213,6 +1214,7 @@ module Snowplow
         end
       end
 
+      Contract String => Elasticity::ClusterStatus
       def cluster_status(jobflow)
         begin
           retries ||= 0
